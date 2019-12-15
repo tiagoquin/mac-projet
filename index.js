@@ -37,17 +37,11 @@ client.on('message', (message) => {
     // Filter
     const filter = (reaction, user) => ['❤️', '🧂'].includes(reaction.emoji.name) && user.id === message.author.id;
 
-    const collector = message.createReactionCollector(filter, { time: 60000 });
-
-
-    collector.on('collect', (reaction, reactionCollector) => {
-      console.log(`Collected ${reaction.emoji.name}`);
-    });
-
-    collector.on('end', (collected) => {
-      console.log(`Collected ${collected.size} items`);
-    });
-
+    message.awaitReactions(filter, { max: 4, time: 60000, errors: ['time'] })
+      .then((collected) => console.log(collected.size))
+      .catch((collected) => {
+        console.log(`After a minute, only ${collected.size} out of 4 reacted.`);
+      });
     /*
     // await Reactions
     message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
