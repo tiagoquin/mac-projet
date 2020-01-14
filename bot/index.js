@@ -1,8 +1,9 @@
 
 require('dotenv').config();
 const fs = require('fs');
+const { config } = require('./config');
+const { neo } = require('./neo4j');
 
-const { env } = process;
 const Discord = require('discord.js');
 
 const client = new Discord.Client(); // create a new Discord client
@@ -20,10 +21,6 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
-const config = {
-  BOT_TOKEN: env.BOT_TOKEN,
-  PREFIX: env.PREFIX,
-};
 
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
@@ -32,37 +29,6 @@ client.once('ready', () => {
 });
 
 client.on('message', (message) => {
-  // Check if this is a command
-  if (!message.content.startsWith(config.PREFIX) || message.author.bot) {
-    // Filter
-    const filter = (reaction, user) => ['❤️', '🧂'].includes(reaction.emoji.name) && user.id === message.author.id;
-
-    message.awaitReactions(filter, { max: 4, time: 60000, errors: ['time'] })
-      .then((collected) => console.log(collected.size))
-      .catch((collected) => {
-        console.log(`After a minute, only ${collected.size} out of 4 reacted.`);
-      });
-    /*
-    // await Reactions
-    message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
-      .then((collected) => {
-        const reaction = collected.first();
-
-        if (reaction.emoji.name === '❤️') {
-          message.reply('you reacted with a ❤️');
-        } else {
-          message.reply('you reacted with a 🧂');
-        }
-      })
-      .catch(() => {
-        // message.reply('you reacted with neither a thumbs up, nor a thumbs down.');
-      });
-
-      */
-
-    return;
-  }
-
   // From here, the code concerns a command
 
   const args = message.content.slice(config.PREFIX.length).split(' ');
@@ -89,6 +55,20 @@ client.on('message', (message) => {
     console.error(error);
     message.reply('there was an error trying to execute that command!');
   }
+});
+
+/**
+ * Listens to incoming reactions
+ */
+client.on('messageReactionAdd', (reaction, user) => {
+  const params = {
+    author: reaction.message.author.tag,
+    message: reaction.message.content,
+    responder: user.tag,
+    emoji: reaction.emoji.name
+  };
+  console.log(params.author, params.message, params.responder, params.emoji);
+  neo.addReaction(params.author, params.message, params.responder, params.emoji);
 });
 
 client.login(config.BOT_TOKEN);
