@@ -28,5 +28,6 @@ services:
       - "7687:7687"
     environment: 
       - NEO4J_AUTH=none # Change this in a prod env :3
+      - NEO4JLABS_PLUGINS=["apoc", "graph-algorithms"]
     volumes:
       - ./data:/data

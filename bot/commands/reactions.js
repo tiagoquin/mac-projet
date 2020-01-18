@@ -10,12 +10,12 @@ module.exports = {
     const { tag } = message.author;
     neo.topReactions(tag)
       .then((result) => {
-        console.log(result);
+        const embed = makeEmbed('Top reactions', result, true);
 
-        const embed = makeEmbed('Top reactions', result);
-
-        message.channel.send(embed);
-
+        message.channel.send(embed)
+          .catch(() => {
+            message.channel.send('Sorry human -> I need the permission to send links to use Rich Embed feature');
+          });
       }).catch((err) => {
         console.error(err);
         message.channel.send('Sorry human. Something went wrong');

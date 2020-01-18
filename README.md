@@ -58,6 +58,12 @@ USER_NEO4J=neo4j
 PASSWORD_NEO4J=neo4j
 ```
 
+## Schema
+
+Here is our graph model:
+
+![schema](./img/schema.png)
+
 ## Implementation
 
 We have implemented the following:
