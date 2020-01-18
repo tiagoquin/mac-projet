@@ -198,8 +198,8 @@ const topFriends = async (user) => {
 
   const array = result.records.map(
     (record) => ({
-      title: record.get('friend'),
-      content: record.get('numberOfRelations').toNumber(),
+      title: record.get('numberOfRelations').toNumber(),
+      content: record.get('friend'),
     }),
   );
 
@@ -208,8 +208,8 @@ const topFriends = async (user) => {
 
 const suggest = async (user) => {
   const query = `
-    MATCH (p1:Person{name: $user})-[r:REACTED*4]-(p2:Person)
-    WHERE NOT (p1)-[:REACTED*2]-(p2)
+    MATCH (p1:Person{name: $user})-[r*4]-(p2:Person)
+    WHERE NOT (p1)-[*2]-(p2)
     WITH size(collect(r)) AS numberOfRelations, p2.name AS suggestion
     ORDER BY numberOfRelations DESC
     LIMIT 5
@@ -224,8 +224,34 @@ const suggest = async (user) => {
 
   const array = result.records.map(
     (record) => ({
-      title: record.get('suggestion'),
-      content: record.get('numberOfRelations').toNumber(),
+      title: record.get('numberOfRelations').toNumber(),
+      content: record.get('suggestion'),
+    }),
+  );
+
+  return array;
+};
+
+const pathAtoB = async (source, target) => {
+  const query = `
+    MATCH (start:Person { name: $source }),(end:Person { name: $target }), p = shortestPath((start)-[*]-(end))
+    UNWIND nodes(p) AS n
+    WITH n
+    WHERE 'Person' IN LABELS(n)
+    RETURN n.name AS Names
+  `;
+
+  const params = {
+    source,
+    target,
+  };
+
+  const result = await doQuery(query, params);
+
+  const array = result.records.map(
+    (record) => ({
+      title: '-->',
+      content: record.get('Names'),
     }),
   );
 
@@ -238,6 +264,7 @@ const neo = {
   topMessages,
   topFriends,
   suggest,
+  pathAtoB,
 };
 
 module.exports = { neo };

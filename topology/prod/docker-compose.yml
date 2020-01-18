@@ -1,0 +1,47 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+
+  neo4j:
+    image: neo4j:latest
+    ports:
+      - "7474:7474" # HTTP
+      - "7687:7687" # BOLT
+    environment: 
+      - NEO4J_AUTH=none # Change this in a prod env :3
+      - NEO4JLABS_PLUGINS=["apoc", "graph-algorithms"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*, algo.*
+    volumes:
+      - ./data:/data
+
+  node:
+    build: ../../bot
+    depends_on:
+      - mongo
+      - neo4j
+    environment: 
+      - BOT_TOKEN=$BOT_TOKEN
+      - PREFIX=$PREFIX
+      - URI_NEO4J=bolt://neo4j
+      - USER_NEO4J=$USER_NEO4J
+      - PASSWORD_NEO4J=$PASSWORD_NEO4J
+    command: ["/usr/scripts/wait-for-it.sh", "neo4j:7474", "-t", "0", "--", "npm", "start"]

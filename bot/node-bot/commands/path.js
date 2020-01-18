@@ -2,15 +2,17 @@ const { neo } = require('../neo');
 const { makeEmbed } = require('../embed');
 
 module.exports = {
-  name: 'msg',
-  description: 'Top Messages d\'un utilisateur avec le plus de réactions',
+  name: 'path',
+  description: 'Give you the path to friendship with someone',
   args: false,
-  usage: '',
+  usage: '<someones#9999>',
   execute(message, args) {
     const { tag } = message.author;
-    neo.topMessages(tag)
+    const target = args[0] || ' ';
+
+    neo.pathAtoB(tag, target)
       .then((result) => {
-        const embed = makeEmbed('Top messages', result, message.author, false);
+        const embed = makeEmbed('Path', result, message.author, false);
 
         message.channel.send(embed)
           .catch((err) => {

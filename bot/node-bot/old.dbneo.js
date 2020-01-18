@@ -143,3 +143,17 @@ const dbneo = {
 }
 
 module.exports = { dbneo };
+
+`
+MATCH (a:Person { name: '---' }),(b:Person), p = shortestPath((a)-[*..15]-(b))
+WHERE a.name <> b.name
+WITH collect(b.name) as friends
+RETURN friends
+`
+
+`
+MATCH (p1:Person{name:$})-[r:REACTED*4]-(p2:Person)
+WHERE NOT (p1)-[:REACTED*2]-(p2)
+WITH collect(r) AS t, p2.name AS suggestion
+RETURN suggestion
+`
