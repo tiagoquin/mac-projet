@@ -1,9 +1,24 @@
+const { neo } = require('../neo');
+const { makeEmbed } = require('../embed');
+
 module.exports = {
   name: 'friends',
-  description: `Top utilisateurs ayant réagit à un utilisateur donné`,
+  description: 'Top des utilisateurs qui ont réagit à tes messages',
   args: false,
-  usage: '<msg>',
+  usage: '',
   execute(message, args) {
-    message.channel.send('Not implemented.');
+    const { tag } = message.author;
+    neo.topFriends(tag)
+      .then((result) => {
+        console.log(result);
+
+        const embed = makeEmbed('Top friends', result);
+
+        message.channel.send(embed);
+
+      }).catch((err) => {
+        console.error(err);
+        message.channel.send('Sorry human. Something went wrong');
+      });
   },
 };

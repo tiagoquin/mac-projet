@@ -1,10 +1,9 @@
-
 require('dotenv').config();
 const fs = require('fs');
-const { config } = require('./config');
-const { neo } = require('./neo4j');
-
 const Discord = require('discord.js');
+const { config } = require('./config');
+const { neo } = require('./neo');
+
 
 const client = new Discord.Client(); // create a new Discord client
 
@@ -13,7 +12,6 @@ const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith
 
 // eslint-disable-next-line no-restricted-syntax
 for (const file of commandFiles) {
-  // eslint-disable-next-line import/no-dynamic-require
   const command = require(`./commands/${file}`);
 
   // set a new item in the Collection
@@ -61,14 +59,20 @@ client.on('message', (message) => {
  * Listens to incoming reactions
  */
 client.on('messageReactionAdd', (reaction, user) => {
+  const { author } = reaction.message;
+
   const params = {
-    author: reaction.message.author.tag,
+    author: author.tag,
     message: reaction.message.content,
     responder: user.tag,
-    emoji: reaction.emoji.name
+    emoji: reaction.emoji.name,
   };
-  console.log(params.author, params.message, params.responder, params.emoji);
-  neo.addReaction(params.author, params.message, params.responder, params.emoji);
+
+  // We don't want to track bots x) only hoomans ∑:3
+  if (!author.bot) {
+    console.log(params.author, params.message, params.responder, params.emoji);
+    neo.addReaction(params.author, params.message, params.responder, params.emoji);
+  }
 });
 
 client.login(config.BOT_TOKEN);
