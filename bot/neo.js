@@ -206,11 +206,38 @@ const topFriends = async (user) => {
   return array;
 };
 
+const suggest = async (user) => {
+  const query = `
+    MATCH (p1:Person{name: $user})-[r:REACTED*4]-(p2:Person)
+    WHERE NOT (p1)-[:REACTED*2]-(p2)
+    WITH size(collect(r)) AS numberOfRelations, p2.name AS suggestion
+    ORDER BY numberOfRelations DESC
+    LIMIT 5
+    RETURN suggestion, numberOfRelations
+  `;
+
+  const params = {
+    user,
+  };
+
+  const result = await doQuery(query, params);
+
+  const array = result.records.map(
+    (record) => ({
+      title: record.get('suggestion'),
+      content: record.get('numberOfRelations').toNumber(),
+    }),
+  );
+
+  return array;
+};
+
 const neo = {
   addReaction,
   topReactions,
   topMessages,
   topFriends,
+  suggest,
 };
 
 module.exports = { neo };

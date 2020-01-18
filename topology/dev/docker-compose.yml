@@ -24,10 +24,11 @@ services:
   neo4j:
     image: neo4j:latest
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7474:7474" # HTTP
+      - "7687:7687" # BOLT
     environment: 
       - NEO4J_AUTH=none # Change this in a prod env :3
       - NEO4JLABS_PLUGINS=["apoc", "graph-algorithms"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*, algo.*
     volumes:
       - ./data:/data

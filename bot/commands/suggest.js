@@ -2,15 +2,15 @@ const { neo } = require('../neo');
 const { makeEmbed } = require('../embed');
 
 module.exports = {
-  name: 'friends',
-  description: 'Top des utilisateurs qui ont réagit à tes messages',
+  name: 'suggest',
+  description: 'Suggestion of 2nd degree friends',
   args: false,
   usage: '',
   execute(message, args) {
     const { tag } = message.author;
-    neo.topFriends(tag)
+    neo.suggest(tag)
       .then((result) => {
-        const embed = makeEmbed('Top friends', result, message.author, false);
+        const embed = makeEmbed('Suggestion of 2nd degree friends', result, message.author, false);
 
         message.channel.send(embed)
           .catch((err) => {

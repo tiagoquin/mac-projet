@@ -58,12 +58,6 @@ USER_NEO4J=neo4j
 PASSWORD_NEO4J=neo4j
 ```
 
-## Schema
-
-Here is our graph model:
-
-![schema](./img/schema.png)
-
 ## Implementation
 
 We have implemented the following:
@@ -77,11 +71,19 @@ We have implemented the following:
   - [ ] Find similar profiles
   - [ ] Find users who have similar reactions to someone
 
+## Schema
+
+Here is our graph model:
+
+![schema](./img/schema.png)
+
 ## Queries
 
 ```
-MATCH (:Person{name: '---'})-[*4]-(p:Person)
-RETURN p
+MATCH (p1:Person{name:'galiaker#9215'})-[r:REACTED*4]-(p2:Person)
+WHERE NOT (p1)-[:REACTED*2]-(p2)
+WITH collect(r) AS t, p2.name AS suggestion
+RETURN suggestion
 ```
 
 ```
