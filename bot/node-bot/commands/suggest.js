@@ -1,4 +1,4 @@
-const { neo } = require('../neo');
+const db = require('../db/dbadapter');
 const { makeEmbed } = require('../embed');
 
 module.exports = {
@@ -8,7 +8,8 @@ module.exports = {
   usage: '',
   execute(message, args) {
     const { tag } = message.author;
-    neo.suggest(tag)
+
+    db.suggest(tag)
       .then((result) => {
         const embed = makeEmbed('Suggestion of 2nd degree friends', result, message.author, false);
 

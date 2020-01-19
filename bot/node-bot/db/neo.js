@@ -1,6 +1,6 @@
 const v1 = require('neo4j-driver');
 
-const { config } = require('./config');
+const { config } = require('../config');
 
 const neo4j = v1;
 
@@ -267,4 +267,4 @@ const neo = {
   pathAtoB,
 };
 
-module.exports = { neo };
+module.exports = neo;

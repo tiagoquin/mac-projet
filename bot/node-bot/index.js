@@ -2,7 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const Discord = require('discord.js');
 const { config } = require('./config');
-const { neo } = require('./neo');
+const db = require('./db/dbadapter');
 
 
 const client = new Discord.Client(); // create a new Discord client
@@ -71,7 +71,7 @@ client.on('messageReactionAdd', (reaction, user) => {
   // We don't want to track bots x) only hoomans ∑:3
   if (!author.bot) {
     console.log(params.author, params.message, params.responder, params.emoji);
-    neo.addReaction(params.author, params.message, params.responder, params.emoji);
+    db.addReaction(params.author, params.message, params.responder, params.emoji);
   }
 });
 

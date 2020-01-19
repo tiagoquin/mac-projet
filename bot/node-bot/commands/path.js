@@ -1,4 +1,4 @@
-const { neo } = require('../neo');
+const db = require('../db/dbadapter');
 const { makeEmbed } = require('../embed');
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
     const { tag } = message.author;
     const target = args[0] || ' ';
 
-    neo.pathAtoB(tag, target)
+    db.pathAtoB(tag, target)
       .then((result) => {
         const embed = makeEmbed('Path', result, message.author, false);
 
