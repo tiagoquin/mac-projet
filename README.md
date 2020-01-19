@@ -16,7 +16,7 @@ This bot is based on discord.js. It allows you to track the reactions on a disco
 
 To connect your bot to discord, you need to get a token.
 
-Get here: https://discordapp.com/developers
+Get it here: https://discordapp.com/developers
 
 Create a bot, give it a fun picture, and then retrieve your **token**. You'll need it later
 
@@ -25,12 +25,12 @@ You'll have to go to oAuth page to add your bot to your server. Give it the righ
 Note: you need to give the bot the right to:
 
 * see channels
-* write
+* send messages
 * send links (So we can use RichEmbed feature)
 
 ### Environnement and configuration
 
-You'll have to create a `.env` file in order to add the env variables.
+You'll have to create a `.env` file in order to add the environment variables.
 
 The following is an example of how to do it:
 
@@ -71,6 +71,13 @@ npm start
 Optionally: `npm run dev` to start with nodemon (hot reload, wow).
 
 ## How it works
+
+### What we used
+
+* Node.js
+* Discord.js
+* Neo4j
+* Mongodb
 
 ### Schema
 
@@ -139,8 +146,8 @@ Here is a sample of some complexe queries
 #### Shortest path between a user and a target
 
 ```cypher
-MATCH (start:Person { name: $source }),(end:Person { name: $target }), p = shortestPath((start)-[*]-(end))
-                                                                                        UNWIND nodes(p) AS n
+MATCH (start:Person { name: $source }),(end:Person { name: $target }), 
+   p = shortestPath((start)-[*]-(end))                                                                                        UNWIND nodes(p) AS n
 WITH n
 WHERE 'Person' IN LABELS(n)
 RETURN n.name AS Names
@@ -179,7 +186,3 @@ We still added it to the report to show some possibilities of our graph database
 | "Yoga, Dieu parmi les Hommes#3087" | "Haero#9008"                       | 0.1111111111111111  |
 | "Chadanlo#1520"                    | "François T#6687"                  | 0.05555555555555555 |
 | "François T#6687"                  | "Chadanlo#1520"                    | 0.05555555555555555 |
-
-## TODO
-
-- [ ] Top messages sans la somme totale, mais par utilisateur différents
