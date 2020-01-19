@@ -59,19 +59,12 @@ client.on('message', (message) => {
  * Listens to incoming reactions
  */
 client.on('messageReactionAdd', (reaction, user) => {
-  const { author } = reaction.message;
-
-  const params = {
-    author: author.tag,
-    message: reaction.message.content,
-    responder: user.tag,
-    emoji: reaction.emoji.name,
-  };
+  const { message } = reaction;
+  const { author } = message;
 
   // We don't want to track bots x) only hoomans ∑:3
   if (!author.bot) {
-    console.log(params.author, params.message, params.responder, params.emoji);
-    db.addReaction(params.author, params.message, params.responder, params.emoji);
+    db.addReaction(author, message, user, reaction);
   }
 });
 

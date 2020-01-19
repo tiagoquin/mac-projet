@@ -8,7 +8,8 @@ module.exports = {
   usage: '<someones#9999>',
   execute(message, args) {
     const { tag } = message.author;
-    const target = args[0] || ' ';
+
+    const target = args.reduce((acc, cur) => `${acc} ${cur}`, '').substr(1);
 
     db.pathAtoB(tag, target)
       .then((result) => {

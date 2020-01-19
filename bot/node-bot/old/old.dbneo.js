@@ -1,5 +1,5 @@
 const neo4j = require('neo4j-driver').v1;
-const { config } = require('./config');
+const { config } = require('../config');
 
 const uri = config.URI_NEO4J;
 const user = config.USER_NEO4J;

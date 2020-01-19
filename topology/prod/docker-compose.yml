@@ -11,7 +11,10 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     ports:
       - 27017:27017
-
+    volumes:
+      - ./data/db
+      - ./data/configdb
+  
   mongo-express:
     image: mongo-express
     restart: always
@@ -44,4 +47,7 @@ services:
       - URI_NEO4J=bolt://neo4j
       - USER_NEO4J=$USER_NEO4J
       - PASSWORD_NEO4J=$PASSWORD_NEO4J
+      - URI_MONGO=mongo
+      - USER_MONGO=$USER_MONGO
+      - PASSWORD_MONGO=$PASSWORD_MONGO
     command: ["/usr/scripts/wait-for-it.sh", "neo4j:7474", "-t", "0", "--", "npm", "start"]

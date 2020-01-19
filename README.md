@@ -82,7 +82,7 @@ Here is our graph model:
 We have implemented the following (from the spec):
 
 - [x] Top messages from a user (with the most reactions)
-  - [ ] And specify a particular emoji
+  - [x] And specify a particular emoji
 - [x] Top users who reacted to a user
   - [ ] And specify a particular emoji
   - [x] Find friends at other depth levels (In our implem. you can find at 2nd lvl of depth)
@@ -96,7 +96,7 @@ And added some other features:
 
 ### Queries
 
-##### Shortest path between a user and a target
+#### Shortest path between a user and a target
 
 ```cypher
 MATCH (start:Person { name: $source }),(end:Person { name: $target }), p = shortestPath((start)-[*]-(end))
@@ -113,6 +113,32 @@ We then proceed a shortest Path between the two. This will give us a path p.
 Now, we unwind the path to convert it to a list of nodes.
 
 Finally, let's filter out the Message Nodes. And here we have a list of names from A to B.
+
+#### Similarity
+
+As we were coding, we pased by some fun feature: similarity. We did not implemented this request in the bot for now. It would need a bit of tuning to filter only for a specific user.
+
+```cypher
+CALL algo.nodeSimilarity.stream('Person | Message', 'REACTED', {
+  direction: 'OUTGOING'
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESCENDING, Person1, Person2
+```
+
+We still added it to the report to show some possibilities of our graph database.
+
+| Person1                            | Person2                            | similarity          |
+| :--------------------------------- | :--------------------------------- | :------------------ |
+| "Babb The 山羊 21#2026"            | "François T#6687"                  | 0.3333333333333333  |
+| "François T#6687"                  | "Babb The 山羊 21#2026"            | 0.3333333333333333  |
+| "Chadanlo#1520"                    | "JackEri#4455"                     | 0.11764705882352941 |
+| "JackEri#4455"                     | "Chadanlo#1520"                    | 0.11764705882352941 |
+| "Haero#9008"                       | "Yoga, Dieu parmi les Hommes#3087" | 0.1111111111111111  |
+| "Yoga, Dieu parmi les Hommes#3087" | "Haero#9008"                       | 0.1111111111111111  |
+| "Chadanlo#1520"                    | "François T#6687"                  | 0.05555555555555555 |
+| "François T#6687"                  | "Chadanlo#1520"                    | 0.05555555555555555 |
 
 ## TODO
 

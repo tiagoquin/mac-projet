@@ -1,4 +1,5 @@
 const v1 = require('neo4j-driver');
+const Discord = require('discord.js');
 
 const { config } = require('../config');
 
@@ -10,26 +11,6 @@ const PASSWORD = config.PASSWORD_NEO4J;
 
 
 const driver = neo4j.driver(URI, neo4j.auth.basic(USER, PASSWORD));
-
-const queryA = () => {
-  const personName = 'Alice';
-  const resultPromise = session.run(
-    'CREATE (a:Person {name: $name}) RETURN a',
-    { name: personName }
-  );
-
-  resultPromise.then(result => {
-    session.close();
-
-    const singleRecord = result.records[0];
-    const node = singleRecord.get(0);
-
-    console.log(node.properties.name);
-
-    // on application exit:
-    driver.close();
-  });
-};
 
 /**
  * Execute a query with Neo4j driver
@@ -63,34 +44,42 @@ const addMessageRel = async (authorid, messageid) => {
   const params = { author: authorid, msg: messageid };
 
   await doQuery(query, params);
-}
+};
 
-const addMessage = async (authorid, messageid) => {
+/**
+ * Add message node
+ *
+ * @param {string} authorid user#9999
+ * @param {string} messageid id
+ * @param {string} content content
+ */
+const addMessage = async (authorid, messageid, content) => {
   const query = `
     MERGE (author:Person{name: $author})
-    MERGE (msg:Message{name: $msg})
+    MERGE (msg:Message{name: $content, id: $messageid})
     RETURN *
     `;
 
   const params = {
     author: authorid,
-    msg: messageid,
+    messageid,
+    content,
   };
 
   await doQuery(query, params);
-  await addMessageRel(authorid, messageid);
+  await addMessageRel(authorid, content);
 };
 
 /**
  * Adds a reaction to Neo DB
  *
- * @param {*} authorid A way to identify the user (user#1010)
- * @param {*} messageid A way to identify the message
- * @param {*} responderid A way to identify the reacting user
- * @param {*} reaction The emoji used to react
+ * @param {Discord.User} authorid A way to identify the user (user#1010)
+ * @param {Discord.Message} message A way to identify the message
+ * @param {Discord.User} responderid A way to identify the reacting user
+ * @param {Discord.Rea} reaction The emoji used to react
  */
-const addReaction = async (authorid, messageid, responderid, reaction) => {
-  await addMessage(authorid, messageid);
+const addReaction = async (authorid, message, responderid, reaction) => {
+  await addMessage(authorid, message.id, message.content);
 
   const query = `
     MATCH (msg:Message{name: $msg})
@@ -101,7 +90,7 @@ const addReaction = async (authorid, messageid, responderid, reaction) => {
 
   const params = {
     responder: responderid,
-    msg: messageid,
+    msg: message.content,
     reaction,
   };
 
@@ -123,14 +112,6 @@ const topReactions = async (user) => {
     RETURN emoji, numberOfRelations  
   `;
 
-  const oldquery = `
-    MATCH (p:Person{name: $user})-[rel:REACTED]->(m:Message)
-    WITH rel.emoji AS emoji, size(collect(rel)) AS numberOfRelations
-    ORDER BY numberOfRelations DESC
-    LIMIT 5
-    RETURN emoji, numberOfRelations
-  `;
-
   const params = {
     user,
   };
@@ -147,17 +128,14 @@ const topReactions = async (user) => {
   return array;
 };
 
+/**
+ * Calculates the top message by reactions
+ *
+ * @param {string} user user#9999
+ */
 const topMessages = async (user) => {
   const query = `
     MATCH (p:Person{name: $user})-[:POSTED]->(m:Message)<-[rel:REACTED]-(:Person)
-    WITH m.name AS message, size(collect(rel)) AS numberOfRelations
-    ORDER BY numberOfRelations DESC
-    LIMIT 5
-    RETURN message, numberOfRelations
-  `;
-
-  const oldquery = `
-    MATCH (p:Person{name: $user})-[rel:REACTED]->(m:Message)
     WITH m.name AS message, size(collect(rel)) AS numberOfRelations
     ORDER BY numberOfRelations DESC
     LIMIT 5
@@ -180,6 +158,45 @@ const topMessages = async (user) => {
   return array;
 };
 
+/**
+ * Calculates the top message by reactions
+ *
+ * @param {string} user user#9999
+ * @param {string} emoji emoji symbol
+ */
+const topMessagesByEmoji = async (user, emoji) => {
+  const query = `
+  MATCH (p:Person{name: $user})-[]-(m:Message)-[rel]-(:Person)
+  WHERE rel.emoji CONTAINS $emoji
+  WITH m.name AS message, size(collect(rel)) AS numberOfRelations
+  ORDER BY numberOfRelations DESC
+  LIMIT 5
+  RETURN message, numberOfRelations
+  `;
+
+  const params = {
+    user,
+    emoji,
+  };
+
+  const result = await doQuery(query, params);
+
+  const array = result.records.map(
+    (record) => ({
+      title: record.get('numberOfRelations').toNumber(),
+      content: record.get('message'),
+    }),
+  );
+
+  return array;
+};
+
+/**
+ * Calculates top friends (who interract / react more
+ *
+ * @param {string} user user tag
+ * @returns {Array} array of {title, content}
+ */
 const topFriends = async (user) => {
   const query = `
     MATCH (p:Person)-[rel:REACTED]->(m:Message)<-[:POSTED]-(me:Person{name: $user})
@@ -206,6 +223,12 @@ const topFriends = async (user) => {
   return array;
 };
 
+/**
+ * Calculates suggestions of friends at 2nd degree
+ *
+ * @param {string} user user tag
+ * @returns {Array} array of {title, content}
+ */
 const suggest = async (user) => {
   const query = `
     MATCH (p1:Person{name: $user})-[r*4]-(p2:Person)
@@ -232,6 +255,13 @@ const suggest = async (user) => {
   return array;
 };
 
+/**
+ * Shortest path from source to target
+ *
+ * @param {string} source from
+ * @param {string} target to
+ * @returns {Array} array of {title, content}
+ */
 const pathAtoB = async (source, target) => {
   const query = `
     MATCH (start:Person { name: $source }),(end:Person { name: $target }), p = shortestPath((start)-[*]-(end))
@@ -262,6 +292,7 @@ const neo = {
   addReaction,
   topReactions,
   topMessages,
+  topMessagesByEmoji,
   topFriends,
   suggest,
   pathAtoB,
