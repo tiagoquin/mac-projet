@@ -40,6 +40,9 @@ PREFIX=!
 URI_NEO4J=bolt://localhost
 USER_NEO4J=neo4j
 PASSWORD_NEO4J=neo4j
+URI_MONGO=localhost
+USER_MONGO=root
+PASSWORD_MONGO=example
 ```
 
 Now let's see where to use it.
@@ -75,7 +78,28 @@ Here is our graph model:
 
 ![schema](./img/schema.png)
 
+Document models:
 
+Person
+
+```json
+{
+ avatar, #avatar url
+ tag,
+ id, #user discord id
+}
+```
+
+Message
+
+```json
+{
+ content,
+ id,
+ createdAt,
+ reactions: [reaction],
+}
+```
 
 ### What we did
 
@@ -84,17 +108,33 @@ We have implemented the following (from the spec):
 - [x] Top messages from a user (with the most reactions)
   - [x] And specify a particular emoji
 - [x] Top users who reacted to a user
-  - [ ] And specify a particular emoji
+  - [x] And specify a particular emoji
   - [x] Find friends at other depth levels (In our implem. you can find at 2nd lvl of depth)
 - [x] Top reactions from a user (Profile)
   - [ ] Find similar profiles
   - [ ] Find users who have similar reactions to someone
 
+We did not implemented the two last features because of wild cucumbers and REST APIs. (AMT)
+
 And added some other features:
 
 - [x] Find the path between you and another user
 
+### Commands
+
+| Command              | Explanation                                                  |
+| -------------------- | ------------------------------------------------------------ |
+| !msg                 | Top messages from you                                        |
+| !msg [emoji]         | Top messages filtered by a specific emoji                    |
+| !reactions           | Top reactions people give you                                |
+| !friends             | Top friends who react to you                                 |
+| !friends [emoji]     | Top friends who react to you with a specific emoji           |
+| !suggest             | Suggestion of friends in 2nd degree                          |
+| !path [someone#9999] | Gives you a path to him (people you should talk to, to become friends) |
+
 ### Queries
+
+Here is a sample of some complexe queries
 
 #### Shortest path between a user and a target
 

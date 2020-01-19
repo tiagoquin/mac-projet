@@ -11,6 +11,7 @@ const {
   topMessages,
   topMessagesByEmoji,
   topFriends,
+  topFriendsByEmoji,
   suggest,
   pathAtoB,
 } = neo;
@@ -37,6 +38,7 @@ const db = {
   topMessages,
   topMessagesByEmoji,
   topFriends,
+  topFriendsByEmoji,
   suggest,
   pathAtoB,
 };

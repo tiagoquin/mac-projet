@@ -9,18 +9,34 @@ module.exports = {
   execute(message, args) {
     const { tag } = message.author;
 
-    db.topFriends(tag)
-      .then((result) => {
-        const embed = makeEmbed('Top friends', result, message.author, false);
+    if (args[0]) {
+      db.topFriendsByEmoji(tag, args[0])
+        .then((result) => {
+          const embed = makeEmbed('Top friends', result, message.author, false);
 
-        message.channel.send(embed)
-          .catch((err) => {
-            console.error(err);
-            message.channel.send('Sorry human -> I need the permission to send links to use Rich Embed feature');
-          });
-      }).catch((err) => {
-        console.error(err);
-        message.channel.send('Sorry human. Something went wrong');
-      });
+          message.channel.send(embed)
+            .catch((err) => {
+              console.error(err);
+              message.channel.send('Sorry human -> I need the permission to send links to use Rich Embed feature');
+            });
+        }).catch((err) => {
+          console.error(err);
+          message.channel.send('Sorry human. Something went wrong');
+        });
+    } else {
+      db.topFriends(tag)
+        .then((result) => {
+          const embed = makeEmbed('Top friends', result, message.author, false);
+
+          message.channel.send(embed)
+            .catch((err) => {
+              console.error(err);
+              message.channel.send('Sorry human -> I need the permission to send links to use Rich Embed feature');
+            });
+        }).catch((err) => {
+          console.error(err);
+          message.channel.send('Sorry human. Something went wrong');
+        });
+    }
   },
 };

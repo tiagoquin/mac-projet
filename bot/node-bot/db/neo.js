@@ -224,6 +224,40 @@ const topFriends = async (user) => {
 };
 
 /**
+ * Calculates top friends (who interract / react more
+ *
+ * @param {string} user user tag
+ * @param {string} emoji emoji
+ * @returns {Array} array of {title, content}
+ */
+const topFriendsByEmoji = async (user, emoji) => {
+  const query = `
+    MATCH (p:Person)-[rel:REACTED]->(m:Message)<-[:POSTED]-(me:Person{name: $user})
+    WHERE p.name <> me.name AND rel.emoji CONTAINS $emoji
+    WITH p.name AS friend, count(rel) AS numberOfRelations
+    ORDER BY numberOfRelations DESC
+    LIMIT 5
+    RETURN friend, numberOfRelations
+  `;
+
+  const params = {
+    user,
+    emoji,
+  };
+
+  const result = await doQuery(query, params);
+
+  const array = result.records.map(
+    (record) => ({
+      title: record.get('numberOfRelations').toNumber(),
+      content: record.get('friend'),
+    }),
+  );
+
+  return array;
+};
+
+/**
  * Calculates suggestions of friends at 2nd degree
  *
  * @param {string} user user tag
@@ -294,6 +328,7 @@ const neo = {
   topMessages,
   topMessagesByEmoji,
   topFriends,
+  topFriendsByEmoji,
   suggest,
   pathAtoB,
 };
