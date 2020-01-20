@@ -12,8 +12,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ./data/db
-      - ./data/configdb
+      - './data:/data/db'
   
   mongo-express:
     image: mongo-express
