@@ -8,6 +8,10 @@
 
 This bot is based on discord.js. It allows you to track the reactions on a discord server and build a cool graph database. 
 
+## Live presentation
+
+Here: https://docs.google.com/presentation/d/e/2PACX-1vS8txYQRBUWYuL-Ehjql_JzxYA6MXcLDhF5g444Guu_0LxKIUh8MzRWzevWQOTYbeZzbH6EByuatMxU/pub?start=false&loop=false&delayms=60000
+
 ## How to start
 
 ![demo-reactions](img/demo-reactions.png)
